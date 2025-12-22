@@ -27,27 +27,75 @@ pylon:
     features: "${COLLECTION_FEATURES_ID}"
     integrations: "${COLLECTION_INTEGRATIONS_ID}"
 
+# Output Configuration
+# ALL output files go to ./output/ - this is the single source of truth
+output:
+  # Base output directory for all generated content
+  base_dir: "./output"
+
+  # Use dated folders (YYYY-MM-DD format) for organization
+  use_dated_folders: true
+
+  # Folder structure templates
+  features_dir: "features/{date}_{feature_slug}"
+  changelogs_dir: "changelogs/{date}"
+  screenshots_dir: "screenshots"
+
 # Screenshot Configuration
 screenshots:
-  # Browser viewport size (recommended: 1470x840 for consistency)
-  viewport_width: 1470
-  viewport_height: 840
-
-  # Where to save captured screenshots
-  output_dir: "./demo/docs/product_documentation/screenshots"
-
-  # Authentication session file (created by auth_manager.py)
-  auth_session_file: "./scripts/auth_session.json"
+  # Display viewport size (recommend ≤ 1280x800 for best coordinate accuracy)
+  viewport_width: 1280
+  viewport_height: 800
 
   # Screenshot format
   format: "png"
   quality: 90
 
+  # Claude model to use
+  # Options: "claude-sonnet-4-5" (recommended - best cost/quality balance)
+  #          "claude-opus-4-5" (higher quality, 5x more expensive)
+  model: "claude-sonnet-4-5"
+
+  # Anthropic API key (store in .env as ANTHROPIC_API_KEY)
+  api_key: "${ANTHROPIC_API_KEY}"
+
+  # Agent loop settings
+  max_iterations: 50  # Maximum agent loop iterations per task
+  timeout_seconds: 300  # Overall timeout per capture session
+
+  # Authentication Configuration
+  auth:
+    # Enable visual authentication via Computer Use
+    # No more session expiration issues!
+    enabled: true
+
+    # Authentication type
+    # Options: "sso" or "username_password"
+    type: "sso"
+
+    # Login URL
+    login_url: "${PRODUCT_URL}/login"
+
+    # Credentials (store in .env for security)
+    username: "${SCREENSHOT_USER}"
+    password: "${SCREENSHOT_PASS}"
+
+    # SSO provider (only if type: sso)
+    # Options: "google", "okta", "azure", "auth0", etc.
+    sso_provider: "google"
+
+    # Multi-factor authentication (optional)
+    mfa:
+      enabled: false
+      type: "totp"  # Options: "totp", "sms", "manual"
+      totp_secret: "${TOTP_SECRET}"  # Base32 TOTP secret (if type: totp)
+
+  # Verification settings
+  verify_auth_success: true  # Ask Claude to verify authentication worked
+  verify_page_load: true  # Ask Claude to verify pages loaded correctly
+
 # Documentation Configuration
 documentation:
-  # Base path for documentation files
-  base_path: "./demo/docs/product_documentation"
-
   # Documentation categories (must match Pylon collections)
   categories:
     - getting-started
@@ -57,11 +105,8 @@ documentation:
   # Whether to include console URLs in documentation
   include_console_urls: true
 
-# Announcement/Changelog Configuration
+# Announcement Configuration
 announcements:
-  # Where to save changelog and announcement files
-  output_dir: "./demo/docs/product_documentation/changelog"
-
   # Announcement channels (slack, email, or both)
   channels:
     - slack
@@ -73,4 +118,4 @@ announcements:
 # State Tracking
 state:
   # File to track Pylon sync state
-  sync_state_file: "./demo/docs/sync-state.json"
+  sync_state_file: "./output/sync-state.json"

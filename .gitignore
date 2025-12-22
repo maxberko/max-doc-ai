@@ -39,6 +39,9 @@ config.yaml
 demo/docs/product_documentation/screenshots/*.png
 demo/docs/product_documentation/screenshots/*.jpg
 
+# Output directory (generated content - users create their own)
+output/
+
 # Pylon sync state (contains IDs, users should create their own)
 demo/docs/sync-state.json
 

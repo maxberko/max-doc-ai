@@ -242,18 +242,19 @@ Save the documentation to the correct location:
 
 **File path:**
 ```
-demo/docs/product_documentation/[category]/[feature-slug].md
+output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md
 ```
 
 **Examples:**
-- `demo/docs/product_documentation/features/dashboards.md`
-- `demo/docs/product_documentation/integrations/slack-integration.md`
-- `demo/docs/product_documentation/getting-started/quickstart.md`
+- `output/features/2025-12-22_dashboards/dashboards.md`
+- `output/features/2025-12-22_slack-integration/slack-integration.md`
+- `output/features/2025-12-22_quickstart/quickstart.md`
 
 **Filename convention:**
 - Use kebab-case
 - Descriptive but concise
 - Match the feature name
+- Organized by date for easy tracking
 
 ### Step 5: Verify Documentation
 
@@ -289,7 +290,7 @@ Provide a summary:
 ```markdown
 ## Documentation Created: [Feature Name]
 
-**File:** `demo/docs/product_documentation/[category]/[feature-slug].md`
+**File:** `output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md`
 **Category:** [category]
 **Word count:** ~[X] words
 **Screenshots:** [X] embedded

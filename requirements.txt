@@ -1,7 +1,15 @@
 # Python dependencies for max-doc-AI
 
-# Browser automation for screenshot capture
-playwright>=1.40.0
+# Computer Use API for screenshot capture
+anthropic>=0.40.0  # Claude API client with Computer Use support
+pillow>=10.0.0  # Image processing and screenshot handling
+pyautogui>=0.9.54  # Desktop automation (mouse, keyboard control)
+pyotp>=2.9.0  # TOTP codes for multi-factor authentication
+aiohttp>=3.9.0  # Async HTTP client for Computer Use agent loop
+
+# Platform-specific dependencies for Computer Use
+# Linux only (will be skipped on other platforms):
+python-xlib>=0.33; sys_platform == 'linux'  # X11 integration for Linux
 
 # HTTP client for Pylon API
 requests>=2.31.0
@@ -15,5 +23,5 @@ pyyaml>=6.0.0
 # Environment variable management
 python-dotenv>=1.0.0
 
-# Optional: Beautiful Soup for HTML manipulation
+# HTML manipulation
 beautifulsoup4>=4.12.0

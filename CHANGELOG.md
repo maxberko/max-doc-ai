@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release of max-doc-AI
 - 5 integrated Claude Code skills:
   - `create-release` - Master orchestrator for complete release workflow
-  - `capture-screenshots` - Automated screenshot capture with Playwright
+  - `capture-screenshots` - Automated screenshot capture with Claude Computer Use API
   - `update-product-doc` - AI-generated documentation from codebase
   - `sync-docs` - Upload to Pylon CDN and sync to knowledge base
   - `create-changelog` - Generate customer announcements (Slack/Email)

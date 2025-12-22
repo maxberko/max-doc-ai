@@ -226,13 +226,17 @@ class ScreenshotCapturer:
         workflow(self.page)
 
 
-def capture_screenshots_from_plan(plan: list, base_url: str):
+def capture_screenshots_from_plan(plan: list, base_url: str, implementation="auto"):
     """
     Capture screenshots based on a plan
+
+    NOTE: This function now supports multiple implementations (Playwright, Computer Use).
+    It's recommended to use screenshot.factory.create_capturer_from_plan() for new code.
 
     Args:
         plan: List of screenshot plan dicts with 'name', 'url', 'selector' (optional), etc.
         base_url: Base URL for the application
+        implementation: "auto" (from config), "playwright", or "computer_use"
 
     Example plan:
         [
@@ -250,7 +254,23 @@ def capture_screenshots_from_plan(plan: list, base_url: str):
             }
         ]
     """
-    with ScreenshotCapturer() as capturer:
+    # For backward compatibility, use factory if not "auto" or if config specifies Computer Use
+    if implementation != "auto":
+        from screenshot.factory import create_capturer
+        capturer_instance = create_capturer(implementation=implementation)
+    else:
+        # Check config to see if we should use factory
+        try:
+            config = cfg.get_screenshot_config()
+            if config.get('implementation') == 'computer_use':
+                from screenshot.factory import create_capturer
+                capturer_instance = create_capturer(implementation="computer_use")
+            else:
+                capturer_instance = ScreenshotCapturer()
+        except:
+            capturer_instance = ScreenshotCapturer()
+
+    with capturer_instance as capturer:
         for item in plan:
             name = item['name']
             url = base_url + item.get('url', '')

@@ -123,6 +123,112 @@ def get_announcements_config():
     return get_config()['announcements']
 
 
+def get_anthropic_api_key():
+    """
+    Get Anthropic API key for Computer Use
+
+    Checks in order:
+    1. Environment variable ANTHROPIC_API_KEY
+    2. Screenshots config
+
+    Returns:
+        str: API key or None if not found
+    """
+    # Check environment first
+    api_key = os.getenv('ANTHROPIC_API_KEY')
+    if api_key:
+        return api_key
+
+    # Fall back to config
+    try:
+        screenshot_config = get_screenshot_config()
+        return screenshot_config.get('api_key')
+    except:
+        return None
+
+
+def get_output_config():
+    """Get output configuration with defaults"""
+    config = get_config()
+    output_config = config.get('output', {})
+
+    # Defaults
+    defaults = {
+        'base_dir': './output',
+        'use_dated_folders': True,
+        'features_template': 'features/{date}_{feature_slug}',
+        'changelogs_template': 'changelogs/{date}',
+        'screenshots_template': 'screenshots',
+        'legacy_mode': False,
+        'legacy_base': './demo/docs/product_documentation'
+    }
+
+    # Merge with defaults
+    for key, value in defaults.items():
+        if key not in output_config:
+            output_config[key] = value
+
+    return output_config
+
+
+def build_output_path(
+    path_type: str,
+    release_date: str,
+    feature_slug: str = None
+) -> str:
+    """
+    Build output path based on configuration
+
+    Args:
+        path_type: 'features' | 'changelogs' | 'screenshots'
+        release_date: Release date in YYYY-MM-DD format
+        feature_slug: Feature slug (required for features)
+
+    Returns:
+        Absolute path to output directory
+    """
+    output_config = get_output_config()
+
+    # Check legacy mode
+    if output_config['legacy_mode']:
+        base = output_config['legacy_base']
+        if path_type == 'features':
+            return os.path.join(base, 'features')
+        elif path_type == 'changelogs':
+            if feature_slug:
+                return os.path.join(base, 'changelog', feature_slug)
+            else:
+                return os.path.join(base, 'changelog')
+        elif path_type == 'screenshots':
+            return os.path.join(base, 'screenshots')
+
+    # New structure
+    base = output_config['base_dir']
+
+    if path_type == 'features':
+        if not feature_slug:
+            raise ValueError("feature_slug required for features path")
+        template = output_config['features_template']
+        path = template.format(date=release_date, feature_slug=feature_slug)
+    elif path_type == 'changelogs':
+        template = output_config['changelogs_template']
+        path = template.format(date=release_date)
+    elif path_type == 'screenshots':
+        template = output_config['screenshots_template']
+        path = template
+    else:
+        raise ValueError(f"Unknown path_type: {path_type}")
+
+    full_path = os.path.join(base, path)
+
+    # Convert to absolute path
+    if not os.path.isabs(full_path):
+        project_root = Path(__file__).parent.parent
+        full_path = project_root / full_path
+
+    return str(full_path)
+
+
 # Module-level constants for backward compatibility
 if CONFIG:
     PRODUCT_NAME = CONFIG['product']['name']

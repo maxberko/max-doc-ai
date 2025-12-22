@@ -40,7 +40,7 @@ After screenshots are captured, before creating documentation. You need CloudFro
 Find the captured screenshots:
 
 ```bash
-ls -lh demo/docs/product_documentation/screenshots/[feature]-*.png
+ls -lh output/screenshots/[feature]-*.png
 ```
 
 **Verify:**
@@ -56,7 +56,7 @@ Use the Pylon upload script for each screenshot:
 cd /path/to/max-doc-ai
 
 python3 scripts/pylon/upload.py \
-  --image demo/docs/product_documentation/screenshots/[feature]-overview.png \
+  --image output/screenshots/[feature]-overview.png \
   --alt "[Feature Name] overview"
 ```
 
@@ -65,12 +65,12 @@ python3 scripts/pylon/upload.py \
 ```bash
 # Screenshot 1
 python3 scripts/pylon/upload.py \
-  --image demo/docs/product_documentation/screenshots/[feature]-overview.png \
+  --image output/screenshots/[feature]-overview.png \
   --alt "[Feature Name] overview"
 
 # Screenshot 2
 python3 scripts/pylon/upload.py \
-  --image demo/docs/product_documentation/screenshots/[feature]-detail.png \
+  --image output/screenshots/[feature]-detail.png \
   --alt "[Feature Name] detailed view"
 
 # ... continue for all screenshots
@@ -144,7 +144,7 @@ After documentation is written with embedded CloudFront URLs. This publishes the
 Check that documentation file exists and is valid:
 
 ```bash
-cat demo/docs/product_documentation/[category]/[feature].md
+cat output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md
 ```
 
 **Verify:**
@@ -175,7 +175,7 @@ Use the Pylon sync script:
 cd /path/to/max-doc-ai
 
 python3 scripts/pylon/sync.py \
-  --file demo/docs/product_documentation/[category]/[feature].md \
+  --file output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md \
   --key [category]-[feature-slug] \
   --title "[Feature Name]" \
   --slug "[feature-slug]" \
@@ -185,7 +185,7 @@ python3 scripts/pylon/sync.py \
 **Example:**
 ```bash
 python3 scripts/pylon/sync.py \
-  --file demo/docs/product_documentation/features/dashboards.md \
+  --file output/features/2025-12-22_dashboards/dashboards.md \
   --key features-dashboards \
   --title "Dashboards" \
   --slug "dashboards" \
@@ -263,7 +263,7 @@ https://app.usepylon.com/docs/[kb-id]/articles/[article-id]
 
 ### Technical Details:
 
-- Markdown file: demo/docs/product_documentation/[category]/[feature].md
+- Markdown file: output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md
 - Images: [X] screenshots with React wrappers
 - Collection ID: [collection-id]
 - Article ID: [article-id]

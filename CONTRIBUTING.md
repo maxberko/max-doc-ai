@@ -71,7 +71,6 @@ Look for issues tagged with:
 3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
-   playwright install chromium
    ```
 
 4. **Configure for testing**
@@ -130,7 +129,7 @@ max-doc-ai/
 │   │   ├── sync.py          # Documentation sync
 │   │   └── converter.py     # Markdown to HTML
 │   ├── screenshot/          # Screenshot capture
-│   │   └── capture.py       # Playwright automation
+│   │   └── capture.py       # Computer Use automation
 │   └── utils/               # Utilities
 │       └── state.py         # State tracking
 ├── demo/                    # Example documentation
@@ -205,7 +204,7 @@ from pathlib import Path
 
 # Third-party imports
 import requests
-from playwright.sync_api import sync_playwright
+from anthropic import Anthropic
 
 # Local imports
 import config as cfg
@@ -422,7 +421,7 @@ Before submitting a PR:
 - OS: [e.g., macOS 13.0]
 - Python version: [e.g., 3.11.2]
 - Claude Code version: [e.g., 1.2.3]
-- Playwright version: [e.g., 1.40.0]
+- Anthropic SDK version: [e.g., 0.40.0]
 
 ## Screenshots or Logs
 [If applicable, add screenshots or error logs]

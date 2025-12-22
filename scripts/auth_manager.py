@@ -2,6 +2,10 @@
 """
 Authentication Session Manager for max-doc-AI
 
+⚠️ DEPRECATED: This script is no longer needed with Computer Use API.
+   Computer Use handles authentication automatically via visual login.
+   This file is kept only for backward compatibility with legacy Playwright code.
+
 This script opens your product's login page, lets you log in manually via SSO,
 then saves your authenticated session cookies for automated screenshot capture.
 
@@ -159,5 +163,34 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
+
+    # Print deprecation warning
+    print("\n" + "=" * 80)
+    print("⚠️  DEPRECATION WARNING")
+    print("=" * 80)
+    print()
+    print("This auth_manager.py script is DEPRECATED and no longer needed.")
+    print()
+    print("max-doc-AI now uses Claude's Computer Use API for screenshot capture,")
+    print("which handles authentication automatically via visual login.")
+    print()
+    print("To configure authentication for Computer Use:")
+    print("  1. Set SCREENSHOT_USER and SCREENSHOT_PASS in your .env file")
+    print("  2. Configure auth settings in config.yaml under screenshots.auth")
+    print("  3. Run your screenshot capture script - authentication is automatic!")
+    print()
+    print("See docs/computer-use-setup.md for details.")
+    print()
+    print("This script is kept only for legacy Playwright compatibility.")
+    print("=" * 80)
+    print()
+
+    # Ask user if they want to continue
+    response = input("Continue anyway? (y/N): ").strip().lower()
+    if response != 'y':
+        print("\n❌ Aborted. Please use Computer Use API instead.")
+        sys.exit(0)
+
+    print()
 
     save_auth_session(login_url=args.url, timeout_seconds=args.timeout)

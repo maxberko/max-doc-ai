@@ -8,7 +8,7 @@ max-doc-AI is a collection of Claude Code skills that automate documentation cre
 
 max-doc-AI provides 5 integrated Claude skills:
 
-- **📸 capture-screenshots** - Automated screenshot capture using Playwright
+- **📸 capture-screenshots** - Automated screenshot capture using Claude's Computer Use API
 - **📝 update-product-doc** - AI-generated documentation from your codebase
 - **☁️ sync-docs** - Upload to Pylon CDN and sync to knowledge base
 - **📢 create-changelog** - Generate customer announcements for Slack/Email
@@ -20,7 +20,7 @@ max-doc-AI provides 5 integrated Claude skills:
 Claude explores your codebase to understand the feature implementation, patterns, and architecture.
 
 ### 2. Screenshot Capture
-Playwright automates browser navigation with saved authentication sessions to capture consistent screenshots.
+Claude's Computer Use API provides visual browser automation with intelligent authentication and content verification for reliable screenshots.
 
 ### 3. Documentation Generation
 Claude writes comprehensive documentation including:
@@ -43,7 +43,8 @@ Generate targeted announcements:
 
 - **Fully Automated** - One command generates complete release materials
 - **Codebase-Aware** - Claude researches your code to understand features
-- **Screenshot Automation** - Authenticated browser automation with Playwright
+- **Intelligent Screenshot Capture** - Computer Use API with visual authentication (no session expiration!)
+- **Reliable Content Capture** - Claude waits naturally for pages to load and verifies content
 - **Knowledge Base Integration** - Direct sync with Pylon KB
 - **Multi-Channel Announcements** - Generate Slack and email variations
 - **State Tracking** - Track what's synced to avoid duplicates
@@ -56,6 +57,75 @@ Generate targeted announcements:
 - Python 3.8+
 - Pylon account with API access
 
+### Setting Up Claude
+
+Before you can use max-doc-AI, you need to set up your Claude account and API key:
+
+#### 1. Create a Claude Account
+
+If you don't have a Claude account yet:
+1. Visit [claude.ai](https://claude.ai)
+2. Sign up for an account (you can use Google, email, or other sign-in options)
+3. Verify your email address if required
+
+#### 2. Get Your Claude API Key
+
+To use Claude Code and max-doc-AI, you'll need an API key:
+
+1. Go to [console.anthropic.com](https://console.anthropic.com)
+2. Sign in with your Claude account
+3. Navigate to **API Keys** in the left sidebar
+4. Click **Create Key**
+5. Give your key a descriptive name (e.g., "max-doc-ai-local")
+6. Copy the API key immediately (you won't be able to see it again)
+
+**Important:** Keep your API key secure and never commit it to version control.
+
+#### 3. Install Claude Code CLI
+
+Install the Claude Code command-line tool:
+
+```bash
+# macOS/Linux
+brew install anthropics/tap/claude
+
+# Or using npm
+npm install -g @anthropic-ai/claude-code
+
+# Or using pip
+pip install claude-code
+```
+
+Verify the installation:
+```bash
+claude --version
+```
+
+#### 4. Configure Your API Key
+
+Set up your API key for Claude Code:
+
+```bash
+# Option 1: Interactive setup (recommended)
+claude auth login
+
+# Option 2: Set environment variable
+export ANTHROPIC_API_KEY=your-api-key-here
+
+# Option 3: Add to your shell profile for persistence
+echo 'export ANTHROPIC_API_KEY=your-api-key-here' >> ~/.zshrc  # or ~/.bashrc
+source ~/.zshrc  # or ~/.bashrc
+```
+
+**Verify your setup:**
+```bash
+claude run "print hello world"
+```
+
+If you see a response from Claude, you're all set!
+
+**Usage Costs:** Claude API usage is billed based on tokens processed. Check current pricing at [anthropic.com/pricing](https://www.anthropic.com/pricing). max-doc-AI operations typically cost between $0.10-$0.50 per feature release depending on codebase size.
+
 ### Installation
 
 ```bash
@@ -63,22 +133,31 @@ Generate targeted announcements:
 git clone https://github.com/maxberko/max-doc-ai.git
 cd max-doc-ai
 
-# 2. Install Python dependencies
+# 2. Install Python dependencies (includes Computer Use API)
 pip install -r requirements.txt
 
-# 3. Install Playwright browsers
-playwright install chromium
-
-# 4. Copy and configure
+# 3. Copy and configure
 cp config.example.yaml config.yaml
 cp .env.example .env
 
-# 5. Edit config.yaml and .env with your values
-# See docs/setup.md for detailed configuration
+# 4. Configure your environment
+# Add to .env:
+#   - ANTHROPIC_API_KEY=your-api-key
+#   - SCREENSHOT_USER=your-product-username
+#   - SCREENSHOT_PASS=your-product-password
+#   - PYLON_API_KEY=your-pylon-key
+#   (and other required keys)
 
-# 6. Set up authentication for screenshots
-python3 scripts/auth_manager.py
+# 5. Update config.yaml with your product details
+# See docs/computer-use-setup.md for detailed configuration
+
+# 6. Verify Computer Use setup
+python3 scripts/screenshot/test_computer_use.py
 ```
+
+**macOS Users**: Grant accessibility permissions for pyautogui in System Preferences → Security & Privacy → Accessibility.
+
+**See**: [Computer Use Setup Guide](docs/computer-use-setup.md) for complete installation instructions.
 
 ### Basic Usage
 
@@ -87,13 +166,40 @@ Complete release workflow:
 @claude Create a release for the Dashboards feature
 ```
 
-Claude will automatically:
-1. Research the feature in your codebase
+**Interactive Pre-Flight:**
+Claude will first ask you a series of questions to configure the release:
+- How to provide feature information (PRD text, short description, or feature name)
+- Repository source (current codebase or external GitHub repo)
+- Release date (today or specify a date in YYYY-MM-DD format)
+
+**Automated Execution:**
+After collecting information, Claude will automatically:
+1. Research the feature in your codebase (or clone external repo)
 2. Capture product screenshots
 3. Generate comprehensive documentation
 4. Upload screenshots to Pylon CDN
 5. Sync documentation to Pylon KB
 6. Create customer announcements
+
+**Output Structure:**
+
+**IMPORTANT:** All generated files are saved to the `./output/` directory. Nothing is saved outside this folder.
+
+```
+output/
+├── features/YYYY-MM-DD_feature-name/
+│   └── feature-name.md              # Complete documentation
+├── changelogs/YYYY-MM-DD/
+│   └── feature-name/
+│       ├── slack-announcement.md    # Slack announcement
+│       ├── email-announcement.md    # Email announcement
+│       └── README.md                # Release metadata
+├── screenshots/
+│   └── feature-name-*.png           # Product screenshots
+└── sync-state.json                  # Pylon sync state tracking
+```
+
+**Dated Organization:** Features and changelogs are organized by release date (YYYY-MM-DD format) for easy tracking and archiving.
 
 Or use individual skills:
 ```
@@ -112,8 +218,12 @@ Documentation URL: [Pylon URL]
 
 ## Documentation
 
+### Getting Started
+- **[Computer Use Setup](docs/computer-use-setup.md)** - Set up Claude's Computer Use API for screenshots
 - **[Setup Guide](docs/setup.md)** - Complete installation and configuration
 - **[Usage Guide](docs/usage.md)** - How to use each skill
+
+### Advanced
 - **[Configuration Reference](docs/configuration.md)** - All configuration options
 - **[Pylon Integration](docs/pylon-integration.md)** - Deep dive on Pylon KB integration
 - **[Demo Product](docs/demo-product.md)** - Example documentation workflow
@@ -138,8 +248,15 @@ max-doc-ai/
 │   ├── screenshot/          # Screenshot capture
 │   │   └── capture.py       # Playwright automation
 │   └── utils/               # Utilities
-│       └── state.py         # Sync state tracking
-├── demo/                    # Example documentation
+│       ├── state.py         # Sync state tracking
+│       ├── github_helper.py # GitHub repository integration
+│       └── migrate_output.py # Migration helper
+├── output/                  # ALL GENERATED FILES GO HERE
+│   ├── features/            # Documentation: YYYY-MM-DD_feature-name/
+│   ├── changelogs/          # Announcements: YYYY-MM-DD/feature-name/
+│   ├── screenshots/         # All product screenshots
+│   └── sync-state.json      # Pylon sync tracking
+├── demo/                    # Example documentation (reference only)
 │   └── docs/
 │       └── product_documentation/
 ├── docs/                    # Setup guides
@@ -158,6 +275,19 @@ product:
   name: "YourProduct"
   url: "https://app.yourproduct.com"
 
+screenshots:
+  viewport_width: 1280
+  viewport_height: 800
+  model: "claude-sonnet-4-5"
+
+  auth:
+    enabled: true
+    type: "sso"
+    login_url: "${PRODUCT_URL}/login"
+    username: "${SCREENSHOT_USER}"
+    password: "${SCREENSHOT_PASS}"
+    sso_provider: "google"
+
 pylon:
   collections:
     getting-started: "${COLLECTION_GETTING_STARTED_ID}"
@@ -166,6 +296,14 @@ pylon:
 
 **.env** - API keys and IDs (never commit this!)
 ```bash
+# Claude API for Computer Use
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
+
+# Screenshot Authentication
+SCREENSHOT_USER=your-username@example.com
+SCREENSHOT_PASS=your-password
+
+# Pylon API
 PYLON_API_KEY=pylon_api_xxxxx
 PYLON_KB_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 COLLECTION_FEATURES_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -194,9 +332,9 @@ See [Configuration Reference](docs/configuration.md) for all options.
 
 - **Claude Code** - The CLI tool that runs the skills
 - **Python 3.8+** - For scripts and automation
-- **Playwright** - Browser automation for screenshots
+- **Anthropic API Key** - For Computer Use API (screenshot automation)
 - **Pylon Account** - Knowledge base and CDN hosting
-- **Product Access** - Authenticated access to capture screenshots
+- **Product Credentials** - Username/password for visual authentication during screenshot capture
 
 ## Contributing
 

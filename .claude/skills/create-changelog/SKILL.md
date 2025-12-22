@@ -83,12 +83,12 @@ announcements:
 Create a directory for this feature's announcements:
 
 ```
-demo/docs/product_documentation/changelog/[feature-slug]/
+output/changelogs/YYYY-MM-DD/[feature-slug]/
 ```
 
 **Example:**
 ```
-demo/docs/product_documentation/changelog/dashboards/
+output/changelogs/2025-12-22/dashboards/
 ```
 
 ### Step 4: Generate Slack Announcement
@@ -146,7 +146,7 @@ Perfect for managers and team leads who need to monitor progress, spot trends, a
 *Have feedback? Reply to this thread or reach out to our team!*
 ```
 
-**Save to:** `demo/docs/product_documentation/changelog/[feature-slug]/slack-announcement.md`
+**Save to:** `output/changelogs/YYYY-MM-DD/[feature-slug]/slack-announcement.md`
 
 ### Step 5: Generate Email Announcement
 
@@ -259,7 +259,7 @@ The [Product Name] Team
 **Documentation:** https://yourproduct-kb.help.usepylon.com/articles/dashboards
 ```
 
-**Save to:** `demo/docs/product_documentation/changelog/[feature-slug]/email-announcement.md`
+**Save to:** `output/changelogs/YYYY-MM-DD/[feature-slug]/email-announcement.md`
 
 ### Step 6: Create README with Metadata
 
@@ -320,8 +320,8 @@ Create a README file with feature metadata and release checklist:
 
 ## Technical Details
 
-**Documentation file:** `demo/docs/product_documentation/[category]/[feature].md`
-**Screenshots:** `demo/docs/product_documentation/screenshots/[feature]-*.png`
+**Documentation file:** `output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md`
+**Screenshots:** `output/screenshots/[feature]-*.png`
 **Database changes:** [Migrations or N/A]
 **Feature flags:** [Flags used or N/A]
 
@@ -330,7 +330,7 @@ Create a README file with feature metadata and release checklist:
 [Any additional context, caveats, or important information for the release team]
 ```
 
-**Save to:** `demo/docs/product_documentation/changelog/[feature-slug]/README.md`
+**Save to:** `output/changelogs/YYYY-MM-DD/[feature-slug]/README.md`
 
 ### Step 7: Verify Announcements
 
@@ -362,7 +362,7 @@ Provide a summary:
 ```markdown
 ## Announcements Created: [Feature Name]
 
-**Location:** `demo/docs/product_documentation/changelog/[feature-slug]/`
+**Location:** `output/changelogs/YYYY-MM-DD/[feature-slug]/`
 
 ### Files Generated:
 
@@ -408,7 +408,7 @@ Provide a summary:
 
 For releases with multiple features, create a consolidated changelog:
 
-**File:** `demo/docs/product_documentation/changelog/[month]-[year]-release/changelog.md`
+**File:** `output/changelogs/YYYY-MM-DD/combined-release.md`
 
 **Format:**
 

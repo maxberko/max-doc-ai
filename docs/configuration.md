@@ -10,11 +10,7 @@ Main configuration file for all settings.
 
 ### .env
 
-Environment variables for sensitive data (API keys, IDs).
-
-### auth_session.json
-
-Playwright authentication session (auto-generated).
+Environment variables for sensitive data (API keys, IDs, credentials).
 
 ## Configuration Schema
 
@@ -68,29 +64,66 @@ pylon:
 
 ```yaml
 screenshots:
-  viewport_width: 1470
-  viewport_height: 840
-  output_dir: "./demo/docs/product_documentation/screenshots"
-  auth_session_file: "./scripts/auth_session.json"
+  viewport_width: 1280
+  viewport_height: 800
+  output_dir: "./output/screenshots"
   format: "png"
   quality: 90
+
+  model: "claude-sonnet-4-5"
+  max_iterations: 50
+
+  auth:
+    enabled: true
+    type: "sso"  # or "username_password"
+    login_url: "${PRODUCT_URL}/login"
+    username: "${SCREENSHOT_USER}"
+    password: "${SCREENSHOT_PASS}"
+    sso_provider: "google"
+
+    mfa:
+      enabled: false
+      type: "totp"
+      totp_secret: "${TOTP_SECRET}"
 ```
 
 **Options:**
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `viewport_width` | integer | No | 1470 | Browser width in pixels |
-| `viewport_height` | integer | No | 840 | Browser height in pixels |
+| `viewport_width` | integer | No | 1280 | Display width in pixels (≤1280 recommended) |
+| `viewport_height` | integer | No | 800 | Display height in pixels (≤800 recommended) |
 | `output_dir` | string | Yes | - | Where to save screenshots |
-| `auth_session_file` | string | Yes | - | Path to Playwright session file |
 | `format` | string | No | png | Image format (png, jpg) |
 | `quality` | integer | No | 90 | JPEG quality (1-100) |
+| `model` | string | No | claude-sonnet-4-5 | Claude model for Computer Use |
+| `max_iterations` | integer | No | 50 | Max iterations for Computer Use tasks |
+
+**Auth Options:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | boolean | Yes | Enable authentication |
+| `type` | string | Yes | Authentication type: "sso" or "username_password" |
+| `login_url` | string | Yes | Login page URL |
+| `username` | string | Yes | Username/email (from env var) |
+| `password` | string | Yes | Password (from env var) |
+| `sso_provider` | string | No | SSO provider: "google", "microsoft", etc. |
+
+**MFA Options:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | boolean | Yes | Enable MFA support |
+| `type` | string | No | MFA type: "totp" |
+| `totp_secret` | string | No | TOTP secret (from env var) |
 
 **Notes:**
-- Use consistent viewport for professional appearance
-- 1470x840 is optimized for documentation
-- PNG recommended for screenshots (lossless)
+- Viewport size ≤1280x800 recommended for Computer Use coordinate accuracy
+- Computer Use handles authentication automatically via visual login
+- No cookie management or session files needed
+- Credentials stored securely in .env file
+- Cost: ~$0.02 per screenshot with Claude Sonnet 4.5
 
 ### Documentation Section
 

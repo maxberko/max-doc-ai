@@ -15,7 +15,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import config as cfg
-from screenshot.capture import ScreenshotCapturer, capture_screenshots_from_plan
+from screenshot.factory import create_capturer, create_capturer_from_plan
 
 
 def capture_flowstate_screenshots(base_url: str = None):
@@ -110,8 +110,9 @@ def capture_flowstate_screenshots(base_url: str = None):
     print()
 
     # Capture screenshots based on plan
+    # Uses implementation from config (Computer Use or Playwright)
     try:
-        capture_screenshots_from_plan(screenshot_plan, base_url)
+        create_capturer_from_plan(screenshot_plan, base_url)
 
         print("\n" + "=" * 60)
         print("✅ FlowState screenshots captured successfully!")
@@ -147,7 +148,8 @@ def capture_custom_workflow():
     print("📸 Custom Workflow Example")
     print("=" * 60 + "\n")
 
-    with ScreenshotCapturer(headless=False) as capturer:
+    # Use factory to create capturer (reads implementation from config)
+    with create_capturer() as capturer:
         # 1. Navigate to dashboard
         capturer.navigate('https://app.flowstate.example.com/dashboards')
         capturer.wait_for_selector('.dashboard-grid')
