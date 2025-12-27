@@ -7,25 +7,85 @@ product:
   url: "https://app.flowstate.example.com"
   documentation_url: "https://docs.flowstate.example.com"
 
-# Pylon Knowledge Base Configuration
+# Knowledge Base Configuration (Generic)
+# Supports multiple providers: Pylon, Zendesk, Confluence, Notion, etc.
+knowledge_base:
+  # Active provider (pylon, zendesk, confluence, notion, intercom, gitbook)
+  provider: "pylon"
+
+  # Provider-specific configurations
+  providers:
+    # Pylon Configuration
+    pylon:
+      # Get your API key from https://app.usepylon.com/settings/api-keys
+      api_key: "${PYLON_API_KEY}"
+
+      # Your Pylon Knowledge Base ID (found in KB settings)
+      kb_id: "${PYLON_KB_ID}"
+
+      # Your Pylon user ID (for article attribution)
+      author_user_id: "${PYLON_AUTHOR_ID}"
+
+      # Pylon API base URL (shouldn't need to change this)
+      api_base: "https://api.usepylon.com"
+
+      # Collection IDs mapping (create collections in Pylon first, then add IDs here)
+      collections:
+        getting-started: "${COLLECTION_GETTING_STARTED_ID}"
+        features: "${COLLECTION_FEATURES_ID}"
+        integrations: "${COLLECTION_INTEGRATIONS_ID}"
+
+    # Zendesk Configuration (Example)
+    zendesk:
+      # Your Zendesk subdomain (e.g., 'mycompany' for mycompany.zendesk.com)
+      subdomain: "${ZENDESK_SUBDOMAIN}"
+
+      # Admin email
+      email: "${ZENDESK_EMAIL}"
+
+      # API token (generate from Zendesk admin)
+      api_token: "${ZENDESK_API_TOKEN}"
+
+      # Default locale (e.g., 'en-us', 'fr', 'de')
+      locale: "en-us"
+
+      # Optional: Brand ID if using multiple brands
+      brand_id: "${ZENDESK_BRAND_ID}"
+
+      # Section IDs mapping (categories in Zendesk)
+      categories:
+        getting-started: "${ZENDESK_SECTION_GETTING_STARTED_ID}"
+        features: "${ZENDESK_SECTION_FEATURES_ID}"
+        integrations: "${ZENDESK_SECTION_INTEGRATIONS_ID}"
+
+    # Confluence Configuration (Example - not yet implemented)
+    # confluence:
+    #   base_url: "https://your-domain.atlassian.net"
+    #   email: "${CONFLUENCE_EMAIL}"
+    #   api_token: "${CONFLUENCE_API_TOKEN}"
+    #   space_key: "DOCS"
+    #   parent_page_id: "${CONFLUENCE_PARENT_PAGE_ID}"
+
+    # Notion Configuration (Example - not yet implemented)
+    # notion:
+    #   api_key: "${NOTION_API_KEY}"
+    #   database_id: "${NOTION_DATABASE_ID}"
+
+# ============================================================================
+# BACKWARDS COMPATIBILITY: Old pylon configuration (deprecated)
+# ============================================================================
+# For backwards compatibility, you can still use the old format:
 pylon:
-  # Get your API key from https://app.usepylon.com/settings/api-keys
   api_key: "${PYLON_API_KEY}"
-
-  # Your Pylon Knowledge Base ID (found in KB settings)
   kb_id: "${PYLON_KB_ID}"
-
-  # Your Pylon user ID (for article attribution)
   author_user_id: "${PYLON_AUTHOR_ID}"
-
-  # Pylon API base URL (shouldn't need to change this)
   api_base: "https://api.usepylon.com"
-
-  # Collection IDs mapping (create collections in Pylon first, then add IDs here)
   collections:
     getting-started: "${COLLECTION_GETTING_STARTED_ID}"
     features: "${COLLECTION_FEATURES_ID}"
     integrations: "${COLLECTION_INTEGRATIONS_ID}"
+# However, it's recommended to migrate to the new knowledge_base structure above
+# ============================================================================
 
 # Output Configuration
 # ALL output files go to ./output/ - this is the single source of truth

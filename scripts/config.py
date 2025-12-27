@@ -104,8 +104,66 @@ def get_product_url():
 
 
 def get_pylon_config():
-    """Get Pylon configuration"""
-    return get_config()['pylon']
+    """
+    Get Pylon configuration (backwards compatible)
+
+    Checks both new (knowledge_base.providers.pylon) and old (pylon) formats
+    """
+    config = get_config()
+
+    # Try new format first
+    kb_config = config.get('knowledge_base', {})
+    providers = kb_config.get('providers', {})
+    pylon_config = providers.get('pylon')
+
+    if pylon_config:
+        return pylon_config
+
+    # Fall back to old format
+    if 'pylon' in config:
+        return config['pylon']
+
+    raise ValueError(
+        "Pylon configuration not found in config.yaml.\n"
+        "Please add either:\n"
+        "  knowledge_base.providers.pylon (recommended) or\n"
+        "  pylon (legacy format)"
+    )
+
+
+def get_kb_config():
+    """
+    Get knowledge base configuration (generic)
+
+    Returns provider name and provider config.
+    Supports both new and old formats for backwards compatibility.
+    """
+    config = get_config()
+
+    # Try new format
+    kb_config = config.get('knowledge_base', {})
+    if kb_config:
+        provider = kb_config.get('provider', 'pylon')
+        providers = kb_config.get('providers', {})
+        provider_config = providers.get(provider)
+
+        if provider_config:
+            return {
+                'provider': provider,
+                'config': provider_config
+            }
+
+    # Fall back to old Pylon-only format
+    if 'pylon' in config:
+        return {
+            'provider': 'pylon',
+            'config': config['pylon']
+        }
+
+    raise ValueError(
+        "Knowledge base configuration not found in config.yaml.\n"
+        "Please add knowledge_base section with provider configuration."
+    )
 
 
 def get_screenshot_config():

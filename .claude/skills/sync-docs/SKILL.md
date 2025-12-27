@@ -1,23 +1,41 @@
 ---
 name: sync-docs
-description: Sync documentation and screenshots to Pylon knowledge base. Handles two modes: (1) Upload screenshots to Pylon CDN and return CloudFront URLs, (2) Sync markdown documentation to Pylon KB with proper collection assignment. Uses Python scripts for Pylon API integration.
+description: Sync documentation and screenshots to any knowledge base provider (Pylon, Zendesk, Confluence, etc.). Handles two modes: (1) Upload screenshots to KB CDN and return URLs, (2) Sync markdown documentation to KB with proper collection assignment. Provider-agnostic with automatic provider detection from config.
 ---
 
-# Sync Documentation to Pylon
+# Sync Documentation to Knowledge Base
 
-Sync screenshots and documentation to Pylon knowledge base.
+Sync screenshots and documentation to any knowledge base provider.
+
+**Supported Providers:** Pylon, Zendesk, Confluence, Notion, and more.
 
 ## Purpose
 
-This skill handles Pylon integration in two modes:
+This skill handles knowledge base integration in two modes:
 
-1. **Upload Mode**: Upload screenshots to Pylon CDN, get CloudFront URLs
-2. **Sync Mode**: Convert markdown to HTML, sync to Pylon KB with correct collection
+1. **Upload Mode**: Upload screenshots to KB CDN/storage, get URLs
+2. **Sync Mode**: Convert markdown to provider-specific HTML, sync to KB with correct collection
+
+## Provider Selection
+
+The skill automatically detects your active KB provider from `config.yaml`:
+
+```yaml
+knowledge_base:
+  provider: "pylon"  # or "zendesk", "confluence", etc.
+  providers:
+    pylon:
+      # Pylon-specific config
+    zendesk:
+      # Zendesk-specific config
+```
+
+You can also override the provider for a specific operation using `--provider`.
 
 ## Prerequisites
 
-1. **Pylon Configuration**: API key, KB ID, collection IDs in config.yaml
-2. **Python Environment**: Pylon integration scripts installed
+1. **KB Configuration**: Provider credentials and settings in config.yaml
+2. **Python Environment**: KB provider scripts installed
 3. **Screenshots Captured**: For upload mode
 4. **Documentation Written**: For sync mode
 
@@ -48,14 +66,21 @@ ls -lh output/screenshots/[feature]-*.png
 - Filenames are correct
 - File sizes are reasonable (not 0 bytes)
 
-#### Step 2: Upload to Pylon
+#### Step 2: Upload to KB Provider
 
-Use the Pylon upload script for each screenshot:
+Use the generic KB upload script for each screenshot:
 
 ```bash
 cd /path/to/max-doc-ai
 
-python3 scripts/pylon/upload.py \
+# Uses provider from config.yaml
+python3 scripts/kb/upload.py \
+  --image output/screenshots/[feature]-overview.png \
+  --alt "[Feature Name] overview"
+
+# Or specify provider explicitly
+python3 scripts/kb/upload.py \
+  --provider zendesk \
   --image output/screenshots/[feature]-overview.png \
   --alt "[Feature Name] overview"
 ```
@@ -64,28 +89,33 @@ python3 scripts/pylon/upload.py \
 
 ```bash
 # Screenshot 1
-python3 scripts/pylon/upload.py \
+python3 scripts/kb/upload.py \
   --image output/screenshots/[feature]-overview.png \
   --alt "[Feature Name] overview"
 
 # Screenshot 2
-python3 scripts/pylon/upload.py \
+python3 scripts/kb/upload.py \
   --image output/screenshots/[feature]-detail.png \
   --alt "[Feature Name] detailed view"
 
 # ... continue for all screenshots
 ```
 
-#### Step 3: Collect CloudFront URLs
+#### Step 3: Collect CDN URLs
 
-The upload script will output CloudFront URLs like:
+The upload script will output CDN URLs like:
 
 ```
 📤 Uploading: feature-overview.png
-   ✅ Uploaded: https://d1234abcd.cloudfront.net/attachments/abc123/feature-overview.png
+   ✅ Uploaded: https://cdn-url.example.com/attachments/abc123/feature-overview.png
 ```
 
 **Save all URLs** - you'll need them for the documentation.
+
+**Note:** URL format varies by provider:
+- **Pylon**: CloudFront URLs (https://d...cloudfront.net/...)
+- **Zendesk**: Zendesk CDN URLs
+- **Confluence**: Atlassian media URLs
 
 #### Step 4: Create URL Mapping
 
@@ -167,14 +197,24 @@ Create a unique key for state tracking:
 
 This key is used to track whether the article already exists in Pylon.
 
-#### Step 3: Sync to Pylon
+#### Step 3: Sync to KB Provider
 
-Use the Pylon sync script:
+Use the generic KB sync script:
 
 ```bash
 cd /path/to/max-doc-ai
 
-python3 scripts/pylon/sync.py \
+# Uses provider from config.yaml
+python3 scripts/kb/sync.py \
+  --file output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md \
+  --key [category]-[feature-slug] \
+  --title "[Feature Name]" \
+  --slug "[feature-slug]" \
+  --collection [category]
+
+# Or specify provider explicitly
+python3 scripts/kb/sync.py \
+  --provider zendesk \
   --file output/features/YYYY-MM-DD_[feature-slug]/[feature-slug].md \
   --key [category]-[feature-slug] \
   --title "[Feature Name]" \
@@ -184,7 +224,7 @@ python3 scripts/pylon/sync.py \
 
 **Example:**
 ```bash
-python3 scripts/pylon/sync.py \
+python3 scripts/kb/sync.py \
   --file output/features/2025-12-22_dashboards/dashboards.md \
   --key features-dashboards \
   --title "Dashboards" \
@@ -276,11 +316,13 @@ Use the public URL in customer announcements.
 
 ---
 
-## Pylon Integration Details
+## Provider-Specific Details
 
-### React Image Wrappers
+### Content Conversion
 
-**CRITICAL**: Pylon requires images to be wrapped in a specific React component structure. The converter script handles this automatically.
+Each provider may have specific HTML requirements:
+
+**Pylon**: Requires images to be wrapped in React component structures. The PylonProvider handles this automatically.
 
 **Structure:**
 ```html
@@ -339,25 +381,42 @@ CloudFront URLs often contain `&` characters in query parameters. Pylon requires
 
 ## Configuration
 
-Pylon settings in `config.yaml`:
+Knowledge base settings in `config.yaml`:
 
 ```yaml
-pylon:
-  api_key: "${PYLON_API_KEY}"
-  kb_id: "${PYLON_KB_ID}"
-  author_user_id: "${PYLON_AUTHOR_ID}"
-  api_base: "https://api.usepylon.com"
-  collections:
-    getting-started: "${COLLECTION_GETTING_STARTED_ID}"
-    features: "${COLLECTION_FEATURES_ID}"
-    integrations: "${COLLECTION_INTEGRATIONS_ID}"
+knowledge_base:
+  # Active provider
+  provider: "pylon"  # or "zendesk", "confluence", etc.
+
+  # Provider-specific configurations
+  providers:
+    pylon:
+      api_key: "${PYLON_API_KEY}"
+      kb_id: "${PYLON_KB_ID}"
+      author_user_id: "${PYLON_AUTHOR_ID}"
+      api_base: "https://api.usepylon.com"
+      collections:
+        getting-started: "${COLLECTION_GETTING_STARTED_ID}"
+        features: "${COLLECTION_FEATURES_ID}"
+        integrations: "${COLLECTION_INTEGRATIONS_ID}"
+
+    zendesk:
+      subdomain: "${ZENDESK_SUBDOMAIN}"
+      email: "${ZENDESK_EMAIL}"
+      api_token: "${ZENDESK_API_TOKEN}"
+      locale: "en-us"
+      categories:
+        getting-started: "${ZENDESK_SECTION_ID_1}"
+        features: "${ZENDESK_SECTION_ID_2}"
+        integrations: "${ZENDESK_SECTION_ID_3}"
 ```
 
-**Collection IDs:**
-- Create collections in Pylon web UI first
-- Copy the collection ID from the URL
-- Add to config.yaml
-- Collection names must match exactly
+**Setup Steps:**
+1. Choose your KB provider
+2. Create collections/sections in the provider's UI
+3. Copy collection/section IDs
+4. Add to config.yaml under the appropriate provider
+5. Set `knowledge_base.provider` to your active provider
 
 ## Troubleshooting
 

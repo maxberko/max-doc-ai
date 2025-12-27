@@ -128,30 +128,63 @@ If you see a response from Claude, you're all set!
 
 ### Installation
 
+#### Option 1: Interactive Setup (Recommended)
+
+The easiest way to get started:
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/maxberko/max-doc-ai.git
 cd max-doc-ai
 
-# 2. Install Python dependencies (includes Computer Use API)
+# 2. Run the interactive setup wizard
+python3 scripts/setup.py
+
+# 3. Verify everything works
+python3 scripts/health_check.py
+
+# 4. Create your first release
+claude "Create a release for [your feature name]"
+```
+
+**Done!** You're ready to go in under 5 minutes. 🚀
+
+The setup wizard will:
+- Check your system requirements
+- Help you choose a knowledge base provider (Pylon, Zendesk, etc.)
+- Collect your credentials securely
+- Create configuration files automatically
+- Verify your connection
+- Show you exactly what to do next
+
+For detailed information, see **[GETTING_STARTED.md](GETTING_STARTED.md)**.
+
+#### Option 2: Manual Configuration (Advanced)
+
+For advanced users who prefer manual setup:
+
+```bash
+# 1. Clone and install dependencies
+git clone https://github.com/maxberko/max-doc-ai.git
+cd max-doc-ai
 pip install -r requirements.txt
 
-# 3. Copy and configure
+# 2. Copy configuration templates
 cp config.example.yaml config.yaml
 cp .env.example .env
 
-# 4. Configure your environment
-# Add to .env:
+# 3. Configure your environment
+# Edit .env with your credentials:
 #   - ANTHROPIC_API_KEY=your-api-key
 #   - SCREENSHOT_USER=your-product-username
 #   - SCREENSHOT_PASS=your-product-password
 #   - PYLON_API_KEY=your-pylon-key
 #   (and other required keys)
 
-# 5. Update config.yaml with your product details
+# 4. Update config.yaml with your product details
 # See docs/computer-use-setup.md for detailed configuration
 
-# 6. Verify Computer Use setup
+# 5. Verify Computer Use setup
 python3 scripts/screenshot/test_computer_use.py
 ```
 
