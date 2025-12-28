@@ -10,7 +10,7 @@ max-doc-AI provides 5 integrated Claude skills:
 
 - **📸 capture-screenshots** - Automated screenshot capture using Claude's Computer Use API
 - **📝 update-product-doc** - AI-generated documentation from your codebase
-- **☁️ sync-docs** - Upload to Pylon CDN and sync to knowledge base
+- **☁️ sync-docs** - Upload images and sync to your knowledge base (Pylon, Zendesk, etc.)
 - **📢 create-changelog** - Generate customer announcements for Slack/Email
 - **🚀 create-release** - Orchestrate the complete release workflow
 
@@ -30,9 +30,10 @@ Claude writes comprehensive documentation including:
 - Embedded screenshots
 
 ### 4. Knowledge Base Sync
-Documentation and screenshots are uploaded to Pylon:
-- Images → Pylon CDN (CloudFront URLs)
-- Docs → Pylon KB (organized by collections)
+Documentation and screenshots are synced to your knowledge base provider:
+- **Pylon**: Images → CDN (CloudFront URLs), Docs → KB (organized by collections)
+- **Zendesk**: Images → Help Center, Docs → Articles (organized by sections)
+- **Custom**: Extensible provider system for other platforms
 
 ### 5. Customer Announcements
 Generate targeted announcements:
@@ -45,7 +46,7 @@ Generate targeted announcements:
 - **Codebase-Aware** - Claude researches your code to understand features
 - **Intelligent Screenshot Capture** - Computer Use API with visual authentication (no session expiration!)
 - **Reliable Content Capture** - Claude waits naturally for pages to load and verifies content
-- **Knowledge Base Integration** - Direct sync with Pylon KB
+- **Multi-Provider KB Integration** - Works with Pylon, Zendesk, or custom providers
 - **Multi-Channel Announcements** - Generate Slack and email variations
 - **State Tracking** - Track what's synced to avoid duplicates
 
@@ -55,7 +56,7 @@ Generate targeted announcements:
 
 - [Claude Code](https://claude.com/claude-code) installed and configured
 - Python 3.8+
-- Pylon account with API access
+- Knowledge base provider account (Pylon, Zendesk, or other supported platform)
 
 ### Setting Up Claude
 
@@ -210,8 +211,8 @@ After collecting information, Claude will automatically:
 1. Research the feature in your codebase (or clone external repo)
 2. Capture product screenshots
 3. Generate comprehensive documentation
-4. Upload screenshots to Pylon CDN
-5. Sync documentation to Pylon KB
+4. Upload screenshots to your KB provider's CDN
+5. Sync documentation to your knowledge base
 6. Create customer announcements
 
 **Output Structure:**
@@ -229,7 +230,7 @@ output/
 │       └── README.md                # Release metadata
 ├── screenshots/
 │   └── feature-name-*.png           # Product screenshots
-└── sync-state.json                  # Pylon sync state tracking
+└── sync-state.json                  # KB sync state tracking
 ```
 
 **Dated Organization:** Features and changelogs are organized by release date (YYYY-MM-DD format) for easy tracking and archiving.
@@ -246,7 +247,7 @@ Category: getting-started
 
 @claude Skill: create-changelog
 Feature: User Authentication
-Documentation URL: [Pylon URL]
+Documentation URL: [Your KB URL]
 ```
 
 ## Documentation
@@ -258,7 +259,8 @@ Documentation URL: [Pylon URL]
 
 ### Advanced
 - **[Configuration Reference](docs/configuration.md)** - All configuration options
-- **[Pylon Integration](docs/pylon-integration.md)** - Deep dive on Pylon KB integration
+- **[KB Providers Guide](KB_PROVIDERS.md)** - Multi-provider system and adding new providers
+- **[Release Workflow](RELEASE_WORKFLOW_INTEGRATION.md)** - Complete release process documentation
 - **[Demo Product](docs/demo-product.md)** - Example documentation workflow
 
 ## Project Structure
@@ -274,21 +276,32 @@ max-doc-ai/
 │       └── create-changelog/
 ├── scripts/
 │   ├── config.py            # Configuration loader
+│   ├── setup.py             # Interactive setup wizard
+│   ├── health_check.py      # System health validation
 │   ├── auth_manager.py      # Browser authentication
-│   ├── pylon/               # Pylon API integration
-│   │   ├── upload.py        # Screenshot upload to CDN
-│   │   └── sync.py          # Documentation sync
+│   ├── kb/                  # Generic KB sync scripts
+│   │   ├── sync.py          # Documentation sync (multi-provider)
+│   │   └── upload.py        # Image upload (multi-provider)
+│   ├── pylon/               # Pylon-specific utilities
 │   ├── screenshot/          # Screenshot capture
 │   │   └── capture.py       # Playwright automation
 │   └── utils/               # Utilities
 │       ├── state.py         # Sync state tracking
 │       ├── github_helper.py # GitHub repository integration
 │       └── migrate_output.py # Migration helper
+├── utils/                   # Core utilities
+│   ├── kb_providers/        # Knowledge base providers
+│   │   ├── base.py          # Abstract provider interface
+│   │   ├── pylon.py         # Pylon implementation
+│   │   └── zendesk.py       # Zendesk implementation
+│   ├── doc_inventory.py     # Documentation discovery
+│   ├── friendly_errors.py   # User-friendly error messages
+│   └── skill_validator.py   # Skill registration validator
 ├── output/                  # ALL GENERATED FILES GO HERE
 │   ├── features/            # Documentation: YYYY-MM-DD_feature-name/
 │   ├── changelogs/          # Announcements: YYYY-MM-DD/feature-name/
 │   ├── screenshots/         # All product screenshots
-│   └── sync-state.json      # Pylon sync tracking
+│   └── sync-state.json      # KB sync state tracking
 ├── demo/                    # Example documentation (reference only)
 │   └── docs/
 │       └── product_documentation/
@@ -312,7 +325,6 @@ screenshots:
   viewport_width: 1280
   viewport_height: 800
   model: "claude-sonnet-4-5"
-
   auth:
     enabled: true
     type: "sso"
@@ -321,13 +333,29 @@ screenshots:
     password: "${SCREENSHOT_PASS}"
     sso_provider: "google"
 
-pylon:
-  collections:
-    getting-started: "${COLLECTION_GETTING_STARTED_ID}"
-    features: "${COLLECTION_FEATURES_ID}"
+# Knowledge Base Provider Configuration
+knowledge_base:
+  provider: "pylon"  # or "zendesk", "confluence", etc.
+
+  providers:
+    pylon:
+      api_key: "${PYLON_API_KEY}"
+      kb_id: "${PYLON_KB_ID}"
+      author_id: "${PYLON_AUTHOR_ID}"
+      collections:
+        getting-started: "${COLLECTION_GETTING_STARTED_ID}"
+        features: "${COLLECTION_FEATURES_ID}"
+
+    zendesk:
+      subdomain: "${ZENDESK_SUBDOMAIN}"
+      email: "${ZENDESK_EMAIL}"
+      api_token: "${ZENDESK_API_TOKEN}"
+      sections:
+        getting-started: "${ZENDESK_SECTION_GETTING_STARTED}"
+        features: "${ZENDESK_SECTION_FEATURES}"
 ```
 
-**.env** - API keys and IDs (never commit this!)
+**.env** - API keys and credentials (never commit this!)
 ```bash
 # Claude API for Computer Use
 ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
@@ -336,10 +364,17 @@ ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
 SCREENSHOT_USER=your-username@example.com
 SCREENSHOT_PASS=your-password
 
-# Pylon API
+# Pylon (if using Pylon)
 PYLON_API_KEY=pylon_api_xxxxx
 PYLON_KB_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+PYLON_AUTHOR_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 COLLECTION_FEATURES_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Zendesk (if using Zendesk)
+ZENDESK_SUBDOMAIN=yourcompany
+ZENDESK_EMAIL=your-email@example.com
+ZENDESK_API_TOKEN=xxxxxxxxxxxxxxxxxxxxx
+ZENDESK_SECTION_FEATURES=xxxxx
 ```
 
 See [Configuration Reference](docs/configuration.md) for all options.
@@ -366,7 +401,10 @@ See [Configuration Reference](docs/configuration.md) for all options.
 - **Claude Code** - The CLI tool that runs the skills
 - **Python 3.8+** - For scripts and automation
 - **Anthropic API Key** - For Computer Use API (screenshot automation)
-- **Pylon Account** - Knowledge base and CDN hosting
+- **Knowledge Base Provider** - One of:
+  - Pylon (knowledge base and CDN hosting)
+  - Zendesk (help center and articles)
+  - Other supported platforms (see [KB_PROVIDERS.md](KB_PROVIDERS.md))
 - **Product Credentials** - Username/password for visual authentication during screenshot capture
 
 ## Contributing
@@ -382,42 +420,59 @@ cd max-doc-ai
 pip install -r requirements.txt
 
 # Configure for your test environment
-cp config.example.yaml config.yaml
-cp .env.example .env
-# Edit with your test Pylon KB credentials
+python3 scripts/setup.py               # Interactive setup
+# OR manually:
+# cp config.example.yaml config.yaml
+# cp .env.example .env
+# Edit with your test KB credentials
+
+# Test system health
+python3 scripts/health_check.py        # Run all health checks
 
 # Test individual components
 python3 scripts/config.py              # Verify config
-python3 scripts/auth_manager.py        # Test auth flow
+python3 scripts/kb/sync.py discover    # Test doc discovery
 python3 scripts/utils/state.py         # Check state tracking
 ```
 
 ## Roadmap
 
+**Completed:**
+- [x] Multi-provider knowledge base support (Pylon, Zendesk, extensible)
+- [x] Interactive setup wizard
+- [x] Comprehensive health check system
+- [x] Documentation discovery and tracking
+
+**Planned:**
+- [ ] Additional KB providers (Confluence, Notion, GitBook)
 - [ ] Support additional CDN providers (Cloudinary, S3)
 - [ ] Additional announcement channels (Discord, Teams)
 - [ ] Video recording support (demo workflows)
 - [ ] Multi-language documentation support
 - [ ] Versioned documentation (per release)
-- [ ] Integration with other knowledge bases (Notion, GitBook)
 
 ## Troubleshooting
+
+**Configuration issues:**
+- Run `python3 scripts/health_check.py` to diagnose problems
+- Run `python3 scripts/setup.py` to reconfigure
 
 **Screenshots are blank/empty:**
 - Re-run `python3 scripts/auth_manager.py` to refresh auth session
 - Check viewport size matches your product's responsive breakpoints
 
-**Pylon API errors:**
-- Verify API key in `.env` is correct and active
-- Check collection IDs match what exists in Pylon
-- Ensure Knowledge Base ID is correct
+**Knowledge base sync errors:**
+- Verify API credentials in `.env` are correct and active
+- Check collection/section IDs match what exists in your KB
+- Run `python3 scripts/kb/sync.py status` to check sync state
+- See [KB_PROVIDERS.md](KB_PROVIDERS.md) for provider-specific troubleshooting
 
 **Claude can't find feature:**
 - Provide more context about code location
 - Check that feature code is committed
 - Ensure Claude has access to the codebase
 
-See [Setup Guide](docs/setup.md#troubleshooting) for more solutions.
+See [GETTING_STARTED.md](GETTING_STARTED.md#troubleshooting) for more solutions.
 
 ## License
 
@@ -436,7 +491,11 @@ For the full license text, visit: https://www.gnu.org/licenses/gpl-3.0.txt
 Built with:
 - [Claude Code](https://claude.com/claude-code) - AI-powered CLI
 - [Playwright](https://playwright.dev/) - Browser automation
-- [Pylon](https://usepylon.com) - Knowledge base platform
+
+Supported knowledge base platforms:
+- [Pylon](https://usepylon.com) - Knowledge base and CDN
+- [Zendesk](https://www.zendesk.com/) - Help center platform
+- Extensible architecture for custom providers
 
 ---
 
