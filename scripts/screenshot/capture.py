@@ -15,9 +15,10 @@ import sys
 # Add parent directory to path for config import
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import config as cfg
+from screenshot.base import ScreenshotCapturerBase
 
 
-class ScreenshotCapturer:
+class ScreenshotCapturer(ScreenshotCapturerBase):
     """Generic screenshot capture framework"""
 
     def __init__(
