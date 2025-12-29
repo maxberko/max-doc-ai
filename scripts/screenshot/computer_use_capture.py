@@ -67,8 +67,27 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
                 self.output_dir = output_dir or screenshot_config.get('output_dir', './output/screenshots')
 
                 # API configuration
-                self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY') or screenshot_config.get('api_key')
-                self.model = model or screenshot_config.get('model', 'claude-sonnet-4-5')
+                self.anthropic_key = api_key or os.getenv('ANTHROPIC_API_KEY') or screenshot_config.get('api_key')
+                self.google_key = os.getenv('GOOGLE_API_KEY') or screenshot_config.get('google_api_key')
+                
+                # Determine provider
+                self.provider = screenshot_config.get('provider')
+                if not self.provider:
+                    if self.google_key and not self.anthropic_key:
+                        self.provider = 'google'
+                    else:
+                        self.provider = 'anthropic'
+                
+                if self.provider == 'google':
+                    self.api_key = self.google_key
+                    # Default Gemini model if not specified or is claude default
+                    if not model and (not screenshot_config.get('model') or 'claude' in screenshot_config.get('model', '')):
+                        self.model = 'gemini-2.5-flash'
+                    else:
+                        self.model = model or screenshot_config.get('model', 'gemini-2.5-flash')
+                else:
+                    self.api_key = self.anthropic_key
+                    self.model = model or screenshot_config.get('model', 'claude-sonnet-4-5')
 
                 # Auth config
                 if auth_credentials is None:
@@ -94,12 +113,21 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
             self._set_defaults(viewport_width, viewport_height, output_dir, api_key, model, auth_credentials)
 
         # Initialize Computer Use components
-        self.client = ComputerUseClient(
-            api_key=self.api_key,
-            model=self.model,
-            display_width=self.viewport_width,
-            display_height=self.viewport_height
-        )
+        if self.provider == 'google':
+            from screenshot.gemini_client import GeminiComputerUseClient
+            self.client = GeminiComputerUseClient(
+                api_key=self.api_key,
+                model=self.model,
+                display_width=self.viewport_width,
+                display_height=self.viewport_height
+            )
+        else:
+            self.client = ComputerUseClient(
+                api_key=self.api_key,
+                model=self.model,
+                display_width=self.viewport_width,
+                display_height=self.viewport_height
+            )
 
         self.tool_executor = ComputerUseTool(
             display_width=self.viewport_width,
@@ -119,8 +147,20 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
         self.viewport_width = viewport_width or 1280
         self.viewport_height = viewport_height or 800
         self.output_dir = output_dir or './output/screenshots'
-        self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
-        self.model = model or 'claude-sonnet-4-5'
+        
+        # Determine provider based on keys
+        google_key = os.getenv('GOOGLE_API_KEY')
+        anthropic_key = api_key or os.getenv('ANTHROPIC_API_KEY')
+        
+        if google_key and not anthropic_key:
+            self.provider = 'google'
+            self.api_key = google_key
+            self.model = model or 'gemini-2.5-flash'
+        else:
+            self.provider = 'anthropic'
+            self.api_key = anthropic_key
+            self.model = model or 'claude-sonnet-4-5'
+            
         self.auth_credentials = auth_credentials
 
     def __enter__(self):

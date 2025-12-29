@@ -1,0 +1,11 @@
+{
+    "permissions": {
+        "allow": [
+            "Skill(capture-screenshots)",
+            "Skill(update-product-doc)",
+            "Skill(sync-docs)",
+            "Skill(create-changelog)",
+            "Skill(create-release)"
+        ]
+    }
+}
