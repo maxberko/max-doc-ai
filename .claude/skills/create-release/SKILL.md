@@ -17,6 +17,25 @@ Do NOT ask questions after the pre-flight phase. Do NOT pause for confirmation d
 
 **THIS IS THE ONLY INTERACTIVE SECTION** - After completion, workflow runs fully automated.
 
+### Important: Check for Pre-filled Information FIRST
+
+**CRITICAL: Before asking any questions, check if the user already provided the information.**
+
+Parse the initial user message for:
+- Lines containing "Feature to release:" or "Feature:" - extract feature description
+- Lines containing "Code source:" - extract repository location
+- Lines containing "Release date:" - extract date
+- Phrases like "Skip the information gathering" or "I have all the information needed"
+
+If ALL required information is detected in the initial message:
+1. Extract and confirm the values
+2. Display brief confirmation showing what was detected
+3. **Skip directly to the Automated Execution phase** (do not ask questions)
+
+If ANY required information is missing:
+1. Only ask for the missing information
+2. Keep the conversational approach described below
+
 ### Important: Conversational Flow
 
 **This skill uses a simple conversational approach - NO complex forms or multi-select options.**

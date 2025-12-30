@@ -47,12 +47,17 @@ You'll need login credentials for your product to enable visual authentication:
 Install the required packages:
 
 ```bash
-pip install anthropic pillow pyautogui pyotp aiohttp
+# Install all dependencies from requirements.txt
+pip install -r requirements.txt
+
+# Or install individually:
+pip install anthropic google-generativeai pillow pyautogui pyotp aiohttp
 ```
 
 **Verify installation**:
 ```bash
 python3 -c "import anthropic; print('✅ Anthropic SDK installed')"
+python3 -c "import google.generativeai; print('✅ Google Gemini SDK installed')"
 python3 -c "import pyautogui; print('✅ pyautogui installed')"
 ```
 
@@ -114,8 +119,14 @@ cp .env.example .env
 Edit `.env` and add your credentials:
 
 ```bash
-# Anthropic API Key
+# AI Provider API Keys
+# You need at least ONE of these:
+
+# Anthropic API Key (for Claude)
 ANTHROPIC_API_KEY=sk-ant-api03-YOUR-KEY-HERE
+
+# Google API Key (for Gemini - alternative provider)
+# GOOGLE_API_KEY=YOUR-GOOGLE-API-KEY-HERE
 
 # Product Authentication
 SCREENSHOT_USER=your-username@example.com
@@ -127,6 +138,24 @@ SCREENSHOT_PASS=your-secure-password
 
 **Important**: Add `.env` to your `.gitignore` (it should already be there).
 
+#### Choosing an AI Provider
+
+max-doc-AI supports two AI providers for Computer Use screenshot capture:
+
+**Anthropic Claude (Default)**:
+- Models: `claude-sonnet-4-5`, `claude-opus-4-5`
+- Pricing: $3-15/MTok input, $15-75/MTok output
+- Best for: Highest quality and reliability
+- Get key: [console.anthropic.com](https://console.anthropic.com)
+
+**Google Gemini (Alternative)**:
+- Models: `gemini-2.5-flash`, `gemini-2.0-flash-exp`
+- Pricing: More cost-effective for high-volume usage
+- Best for: Faster response times, budget-friendly
+- Get key: [makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+
+**Provider Selection**: The system automatically selects the provider based on which API key is available. If both are set, it defaults to Anthropic unless you explicitly configure otherwise in `config.yaml`.
+
 ### Step 2: Configure config.yaml
 
 Copy the example configuration:
@@ -135,6 +164,8 @@ cp config.example.yaml config.yaml
 ```
 
 Edit `config.yaml` and configure Computer Use:
+
+#### Option 1: Using Anthropic Claude (Default)
 
 ```yaml
 screenshots:
@@ -145,29 +176,59 @@ screenshots:
   viewport_width: 1280
   viewport_height: 800
 
-  # Computer Use configuration
-  computer_use:
-    # Model selection (sonnet recommended for cost/quality)
-    model: "claude-sonnet-4-5"
+  # AI Provider Selection (optional - auto-detects if not specified)
+  provider: "anthropic"  # or "google" for Gemini
 
-    # API key (from .env)
-    api_key: "${ANTHROPIC_API_KEY}"
+  # Model selection
+  model: "claude-sonnet-4-5"  # or claude-opus-4-5
 
-    # Authentication
-    auth:
-      enabled: true
-      type: "sso"  # or "username_password"
-      login_url: "${PRODUCT_URL}/login"
-      username: "${SCREENSHOT_USER}"
-      password: "${SCREENSHOT_PASS}"
-      sso_provider: "google"  # google, okta, azure, auth0, etc.
+  # API key (from .env)
+  api_key: "${ANTHROPIC_API_KEY}"
 
-      # Optional: Multi-factor authentication
-      mfa:
-        enabled: false
-        type: "totp"
-        totp_secret: "${TOTP_SECRET}"
+  # Authentication
+  auth:
+    enabled: true
+    type: "sso"  # or "username_password"
+    login_url: "${PRODUCT_URL}/login"
+    username: "${SCREENSHOT_USER}"
+    password: "${SCREENSHOT_PASS}"
+    sso_provider: "google"  # google, okta, azure, auth0, etc.
+
+    # Optional: Multi-factor authentication
+    mfa:
+      enabled: false
+      type: "totp"
+      totp_secret: "${TOTP_SECRET}"
 ```
+
+#### Option 2: Using Google Gemini
+
+```yaml
+screenshots:
+  implementation: "computer_use"
+  viewport_width: 1280
+  viewport_height: 800
+
+  # Explicitly select Google provider
+  provider: "google"
+
+  # Gemini model selection
+  model: "gemini-2.5-flash"  # or gemini-2.0-flash-exp
+
+  # Google API key (from .env)
+  google_api_key: "${GOOGLE_API_KEY}"
+
+  # Authentication (same as Claude)
+  auth:
+    enabled: true
+    type: "sso"
+    login_url: "${PRODUCT_URL}/login"
+    username: "${SCREENSHOT_USER}"
+    password: "${SCREENSHOT_PASS}"
+    sso_provider: "google"
+```
+
+**Note**: If you don't specify a `provider`, the system will automatically choose based on which API key is available.
 
 ### Step 3: Update Product Information
 
@@ -385,6 +446,31 @@ Computer Use API costs vary by model and usage.
 - Batch screenshots in single sessions (shared auth cost)
 - Only capture when needed
 
+### Gemini Pricing
+
+**Google Gemini** offers more cost-effective pricing:
+
+- **Gemini 2.5 Flash**: Significantly cheaper than Claude
+- **Gemini 2.0 Flash Exp**: Experimental model with fast response times
+
+**Typical costs with Gemini**:
+- Authentication: ~$0.03
+- Per screenshot: ~$0.01
+- 5 screenshots with auth: ~$0.08
+- 100 screenshots/month: ~$1.50
+- 1000 screenshots/month: ~$15
+
+**Cost comparison**:
+- Gemini: ~50% cheaper than Claude Sonnet
+- Claude Opus: Most accurate, highest cost
+- Claude Sonnet: Best balance
+- Gemini Flash: Most cost-effective
+
+**Choosing a provider**:
+- Use **Claude Sonnet** for highest quality and reliability
+- Use **Gemini Flash** for high-volume, budget-conscious workflows
+- Try both and see which works best for your product
+
 ### Compare to Playwright
 
 Playwright is "free" but:
@@ -392,27 +478,56 @@ Playwright is "free" but:
 - Updating CSS selectors: **$100-200/month**
 - Maintenance overhead: **Significant**
 
-**Computer Use pays for itself** by eliminating these hidden costs.
+**Computer Use pays for itself** by eliminating these hidden costs, regardless of which AI provider you choose.
 
 ## Troubleshooting
 
-### "No module named 'anthropic'"
+### "No module named 'anthropic'" or "No module named 'google.generativeai'"
 
 **Problem**: Python package not installed.
 
 **Solution**:
 ```bash
+# For Anthropic
 pip install anthropic>=0.40.0
+
+# For Google Gemini
+pip install google-generativeai>=0.3.0
+
+# Or install all dependencies
+pip install -r requirements.txt
 ```
 
-### "ANTHROPIC_API_KEY not set"
+### "ANTHROPIC_API_KEY not set" or "GOOGLE_API_KEY not found"
 
 **Problem**: Environment variable not loaded.
 
 **Solution**:
 1. Check `.env` file exists: `ls -la .env`
-2. Verify API key is set: `grep ANTHROPIC .env`
-3. Make sure no spaces around `=`: `ANTHROPIC_API_KEY=sk-ant-...`
+2. Verify API key is set:
+   ```bash
+   grep ANTHROPIC .env
+   # or
+   grep GOOGLE .env
+   ```
+3. Make sure no spaces around `=`:
+   - `ANTHROPIC_API_KEY=sk-ant-...`
+   - `GOOGLE_API_KEY=AIza...`
+4. If using Gemini, make sure you have the correct provider set in `config.yaml`:
+   ```yaml
+   screenshots:
+     provider: "google"
+     google_api_key: "${GOOGLE_API_KEY}"
+   ```
+
+### "Google provider selected but GOOGLE_API_KEY not found"
+
+**Problem**: Config specifies Google provider but no API key is available.
+
+**Solution**:
+1. Add `GOOGLE_API_KEY` to your `.env` file
+2. Or switch to Anthropic provider in `config.yaml`
+3. Or remove the `provider` setting to let it auto-detect
 
 ### "pyautogui.FailSafeException"
 

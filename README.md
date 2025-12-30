@@ -20,7 +20,7 @@ max-doc-AI provides 5 integrated Claude skills:
 Claude explores your codebase to understand the feature implementation, patterns, and architecture.
 
 ### 2. Screenshot Capture
-Claude's Computer Use API provides visual browser automation with intelligent authentication and content verification for reliable screenshots.
+Claude's Computer Use API (or Google Gemini) provides visual browser automation with intelligent authentication and content verification for reliable screenshots. Choose between Anthropic Claude or Google Gemini based on your needs.
 
 ### 3. Documentation Generation
 Claude writes comprehensive documentation including:
@@ -44,7 +44,7 @@ Generate targeted announcements:
 
 - **Fully Automated** - One command generates complete release materials
 - **Codebase-Aware** - Claude researches your code to understand features
-- **Intelligent Screenshot Capture** - Computer Use API with visual authentication (no session expiration!)
+- **Intelligent Screenshot Capture** - Computer Use API with visual authentication (supports Anthropic Claude & Google Gemini)
 - **Reliable Content Capture** - Claude waits naturally for pages to load and verifies content
 - **Multi-Provider KB Integration** - Works with Pylon, Zendesk, or custom providers
 - **Multi-Channel Announcements** - Generate Slack and email variations
@@ -357,8 +357,11 @@ knowledge_base:
 
 **.env** - API keys and credentials (never commit this!)
 ```bash
-# Claude API for Computer Use
+# AI Provider API Keys (you need at least ONE)
+# Anthropic Claude (default)
 ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
+# Google Gemini (alternative - more cost-effective)
+# GOOGLE_API_KEY=AIza-xxxxx
 
 # Screenshot Authentication
 SCREENSHOT_USER=your-username@example.com
