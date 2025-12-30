@@ -80,6 +80,11 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
                 
                 if self.provider == 'google':
                     self.api_key = self.google_key
+                    if not self.api_key:
+                        raise ValueError(
+                            "Google provider selected but GOOGLE_API_KEY not found. "
+                            "Set GOOGLE_API_KEY environment variable or add 'google_api_key' to config.yaml"
+                        )
                     # Default Gemini model if not specified or is claude default
                     if not model and (not screenshot_config.get('model') or 'claude' in screenshot_config.get('model', '')):
                         self.model = 'gemini-2.5-flash'
@@ -87,6 +92,11 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
                         self.model = model or screenshot_config.get('model', 'gemini-2.5-flash')
                 else:
                     self.api_key = self.anthropic_key
+                    if not self.api_key:
+                        raise ValueError(
+                            "Anthropic provider selected but ANTHROPIC_API_KEY not found. "
+                            "Set ANTHROPIC_API_KEY environment variable or add 'api_key' to config.yaml"
+                        )
                     self.model = model or screenshot_config.get('model', 'claude-sonnet-4-5')
 
                 # Auth config
@@ -151,7 +161,7 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
         # Determine provider based on keys
         google_key = os.getenv('GOOGLE_API_KEY')
         anthropic_key = api_key or os.getenv('ANTHROPIC_API_KEY')
-        
+
         if google_key and not anthropic_key:
             self.provider = 'google'
             self.api_key = google_key
@@ -159,8 +169,12 @@ class ComputerUseScreenshotCapturer(ScreenshotCapturerBase):
         else:
             self.provider = 'anthropic'
             self.api_key = anthropic_key
+            if not self.api_key:
+                raise ValueError(
+                    "No API key found. Set ANTHROPIC_API_KEY or GOOGLE_API_KEY environment variable."
+                )
             self.model = model or 'claude-sonnet-4-5'
-            
+
         self.auth_credentials = auth_credentials
 
     def __enter__(self):

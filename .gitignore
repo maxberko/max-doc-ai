@@ -35,6 +35,9 @@ scripts/auth_session.json
 .env
 config.yaml
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Screenshots (can be large, regenerate as needed)
 demo/docs/product_documentation/screenshots/*.png
 demo/docs/product_documentation/screenshots/*.jpg
