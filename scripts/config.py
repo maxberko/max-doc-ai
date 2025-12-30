@@ -205,6 +205,31 @@ def get_anthropic_api_key():
         return None
 
 
+
+def get_google_api_key():
+    """
+    Get Google API key for Gemini
+
+    Checks in order:
+    1. Environment variable GOOGLE_API_KEY
+    2. Screenshots config
+
+    Returns:
+        str: API key or None if not found
+    """
+    # Check environment first
+    api_key = os.getenv('GOOGLE_API_KEY')
+    if api_key:
+        return api_key
+
+    # Fall back to config
+    try:
+        screenshot_config = get_screenshot_config()
+        return screenshot_config.get('google_api_key')
+    except:
+        return None
+
+
 def get_output_config():
     """Get output configuration with defaults"""
     config = get_config()

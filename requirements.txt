@@ -7,9 +7,15 @@ pyautogui>=0.9.54  # Desktop automation (mouse, keyboard control)
 pyotp>=2.9.0  # TOTP codes for multi-factor authentication
 aiohttp>=3.9.0  # Async HTTP client for Computer Use agent loop
 
+# Google Gemini support for Computer Use (alternative provider)
+google-generativeai>=0.3.0  # Google Gemini API client
+
 # Platform-specific dependencies for Computer Use
 # Linux only (will be skipped on other platforms):
 python-xlib>=0.33; sys_platform == 'linux'  # X11 integration for Linux
+
+# Playwright for privacy-first browser capture
+playwright>=1.40.0  # Browser automation library
 
 # HTTP client for Pylon API
 requests>=2.31.0

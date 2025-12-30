@@ -70,7 +70,7 @@ class SkillValidator:
 
         # Check permissions
         if self.settings_file.exists():
-            with open(self.settings_file, 'r') as f:
+            with open(self.settings_file, 'r', encoding='utf-8') as f:
                 settings = json.load(f)
                 permissions = settings.get('permissions', {}).get('allow', [])
 
@@ -79,6 +79,7 @@ class SkillValidator:
                     if perm.startswith('Skill('):
                         skill_name = perm.replace('Skill(', '').replace(')', '')
                         results['skills_registered'].append(skill_name)
+
 
                 results['permissions'] = {
                     'total': len(permissions),
@@ -108,7 +109,7 @@ class SkillValidator:
                 return False, issues
 
         # Validate SKILL.md has required frontmatter
-        with open(skill_file, 'r') as f:
+        with open(skill_file, 'r', encoding='utf-8') as f:
             content = f.read()
 
             # Check for frontmatter

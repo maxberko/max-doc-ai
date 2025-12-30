@@ -14,39 +14,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from screenshot.base import ScreenshotCapturerBase
 
 
-def create_capturer(**kwargs) -> ScreenshotCapturerBase:
+def create_capturer(provider: str = 'computer_use', **kwargs) -> ScreenshotCapturerBase:
     """
     Factory function to create screenshot capturer
 
-    Creates a Computer Use-based screenshot capturer with intelligent
-    authentication, visual navigation, and reliable content capture.
-
     Args:
+        provider: 'computer_use' or 'playwright'
         **kwargs: Additional arguments passed to capturer constructor
-            - auth_credentials: Optional dict with authentication details
-            - viewport_width: Display width in pixels
-            - viewport_height: Display height in pixels
-            - output_dir: Directory to save screenshots
-            - api_key: Anthropic API key
-            - model: Claude model to use
-
-    Returns:
-        ComputerUseScreenshotCapturer: Configured screenshot capturer instance
-
-    Raises:
-        ImportError: If Computer Use dependencies are not available
-
-    Examples:
-        # Use with defaults from config
-        with create_capturer() as capturer:
-            capturer.navigate("https://example.com")
-            capturer.capture("screenshot.png")
-
-        # Override specific settings
-        with create_capturer(viewport_width=1920, viewport_height=1080) as capturer:
-            capturer.navigate("https://example.com")
-            capturer.capture("screenshot.png")
     """
+    if provider == 'playwright':
+        from screenshot.capture import ScreenshotCapturer
+        return ScreenshotCapturer(**kwargs)
+    
     try:
         from screenshot.computer_use_capture import ComputerUseScreenshotCapturer
         return ComputerUseScreenshotCapturer(**kwargs)
@@ -58,32 +37,16 @@ def create_capturer(**kwargs) -> ScreenshotCapturerBase:
         )
 
 
-def create_capturer_from_plan(plan: list, base_url: str):
+def create_capturer_from_plan(plan: list, base_url: str, provider: str = 'computer_use'):
     """
     Create capturer and execute screenshot plan
 
-    Convenience function that creates a Computer Use capturer and executes
-    a screenshot plan (list of URLs and capture instructions).
-
     Args:
-        plan: List of screenshot plan dicts with:
-            - name: Screenshot filename (without extension)
-            - url: URL path to navigate to (relative to base_url)
-            - wait_for: Optional CSS selector to wait for (converted to visual description)
-            - wait_time: Optional additional wait time in milliseconds
-            - selector: Optional CSS selector to capture specific element
-            - scroll_to: Optional CSS selector to scroll to
-            - full_page: Optional boolean for full-page capture
+        plan: List of screenshot plan dicts
         base_url: Base URL for the application
-
-    Example:
-        plan = [
-            {'name': 'dashboard', 'url': '/dashboard', 'wait_for': '.main-content'},
-            {'name': 'settings', 'url': '/settings', 'wait_time': 2000},
-        ]
-        create_capturer_from_plan(plan, 'https://app.example.com')
+        provider: 'computer_use' or 'playwright'
     """
-    with create_capturer() as capturer:
+    with create_capturer(provider=provider) as capturer:
         for item in plan:
             name = item['name']
             url = base_url + item.get('url', '')
